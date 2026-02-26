@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML to Markdown</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>HTML to Markdown</h1>
+    <div class="options">
+      <label>
+        <input type="checkbox" id="includeTranslations" checked>
+        包含翻译内容
+      </label>
+      <label>
+        <input type="checkbox" id="keepLinks" checked>
+        保留链接
+      </label>
+    </div>
+    <div class="selector-section">
+      <label for="cssSelector">CSS选择器（可选）:</label>
+      <input type="text" id="cssSelector" placeholder="例如: .content, #main">
+      <small>留空则自动提取主要内容区域</small>
+    </div>
+    <div class="selector-section">
+      <label for="markdownPath">Markdown保存路径:</label>
+      <input type="text" id="markdownPath" required placeholder="例如: /docs/foundry/Ontology building/">
+      <small>请输入保存路径</small>
+    </div>
+    <div class="selector-section">
+      <label for="imagePath">图片存储路径:</label>
+      <input type="text" id="imagePath" required placeholder="例如: /docs/resources/foundry/ontology/">
+      <small>请输入图片存储路径</small>
+    </div>
+    <button id="convertBtn">转换为Markdown</button>
+    <div id="status" class="status"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
