@@ -5,8 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const includeTranslationsCheckbox = document.getElementById('includeTranslations');
   const keepLinksCheckbox = document.getElementById('keepLinks');
   const cssSelectorInput = document.getElementById('cssSelector');
-  const markdownPathInput = document.getElementById('markdownPath');
-  const imagePathInput = document.getElementById('imagePath');
+  const savePathInput = document.getElementById('savePath');
   const waitTimeInput = document.getElementById('waitTime');
   
   let isAutoCollecting = false;
@@ -25,19 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadSavedPaths() {
     try {
-      const result = await chrome.storage.local.get(['markdownPath', 'imagePath', 'waitTime']);
-      const defaultPath = 'docs/foundry/Ontology building/';
+      const result = await chrome.storage.local.get(['savePath', 'waitTime']);
+      const defaultPath = 'docs/foundry/';
       
-      if (result.markdownPath) {
-        markdownPathInput.value = result.markdownPath;
+      if (result.savePath) {
+        savePathInput.value = result.savePath;
       } else {
-        markdownPathInput.value = defaultPath;
-      }
-      
-      if (result.imagePath) {
-        imagePathInput.value = result.imagePath;
-      } else {
-        imagePathInput.value = defaultPath;
+        savePathInput.value = defaultPath;
       }
       
       if (result.waitTime) {
@@ -51,8 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function savePaths() {
     try {
       await chrome.storage.local.set({
-        markdownPath: markdownPathInput.value,
-        imagePath: imagePathInput.value,
+        savePath: savePathInput.value,
         waitTime: waitTimeInput.value
       });
     } catch (error) {
@@ -62,8 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadSavedPaths();
 
-  markdownPathInput.addEventListener('input', savePaths);
-  imagePathInput.addEventListener('input', savePaths);
+  savePathInput.addEventListener('input', savePaths);
   waitTimeInput.addEventListener('input', savePaths);
 
   function sanitizeFilename(filename) {
@@ -73,8 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
       .substring(0, 200);
   }
 
-  async function downloadMarkdown(markdown, title, savePath, pageUrl) {
+  async function downloadMarkdown(markdown, title, savePath, pageUrl, menuPath) {
     let filename;
+    let subPath = '';
+    
+    if (menuPath && menuPath.length > 0) {
+      subPath = menuPath.map(p => sanitizeFilename(p)).join('/') + '/';
+    }
     
     if (pageUrl) {
       try {
@@ -101,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const url = URL.createObjectURL(blob);
     
     if (savePath && savePath.trim()) {
-      const fullPath = `${savePath.trim()}${filename}`;
+      const fullPath = `${savePath.trim()}${subPath}${filename}`;
       await chrome.downloads.download({
         url: url,
         filename: fullPath,
@@ -193,6 +189,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      const currentResponse = await chrome.tabs.sendMessage(tab.id, {
+        action: 'getCurrentMenuItem'
+      });
+
       const response = await chrome.tabs.sendMessage(tab.id, {
         action: 'convertToMarkdown',
         cssSelector: cssSelectorInput.value,
@@ -202,11 +202,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (response.success) {
-        await downloadMarkdown(response.markdown, response.title, markdownPathInput.value, tab.url);
+        const menuPath = currentResponse.success && currentResponse.currentItem ? currentResponse.currentItem.path : [];
+        await downloadMarkdown(response.markdown, response.title, savePathInput.value, tab.url, menuPath);
         
         if (response.images && response.images.length > 0) {
           showStatus('正在下载图片...', 'loading');
-          await downloadImages(response.images, response.firstH1Title, imagePathInput.value, tab.url);
+          await downloadImages(response.images, response.firstH1Title, savePathInput.value, tab.url, menuPath);
         }
         
         showStatus('转换成功！文件已下载', 'success');
@@ -307,10 +308,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (convertResponse.success) {
           const currentTab = await chrome.tabs.get(tab.id);
-          await downloadMarkdown(convertResponse.markdown, convertResponse.title, markdownPathInput.value, currentTab.url);
+          const menuPath = menuItem.path || [];
+          await downloadMarkdown(convertResponse.markdown, convertResponse.title, savePathInput.value, currentTab.url, menuPath);
           
           if (convertResponse.images && convertResponse.images.length > 0) {
-            await downloadImages(convertResponse.images, convertResponse.firstH1Title, imagePathInput.value, currentTab.url);
+            await downloadImages(convertResponse.images, convertResponse.firstH1Title, savePathInput.value, currentTab.url, menuPath);
           }
         }
         

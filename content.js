@@ -328,6 +328,54 @@ function getMenuTree() {
     '[class*="navigation"] ul'
   ];
   
+  function extractParentPath(menuItem) {
+    const path = [];
+    let currentLi = menuItem.closest('li');
+    
+    while (currentLi) {
+      let parentText = null;
+      
+      const panelTitle = currentLi.querySelector('[class*="panelTitle"]');
+      if (panelTitle) {
+        parentText = panelTitle.textContent.trim();
+      }
+      
+      if (!parentText) {
+        const headerDiv = currentLi.querySelector('[class*="header"]');
+        if (headerDiv) {
+          parentText = headerDiv.textContent.trim();
+        }
+      }
+      
+      if (!parentText) {
+        const button = currentLi.querySelector('button, [role="button"]');
+        if (button) {
+          parentText = button.textContent.trim();
+        }
+      }
+      
+      if (!parentText) {
+        const link = currentLi.querySelector('a');
+        if (link && link !== menuItem) {
+          parentText = link.textContent.trim();
+        }
+      }
+      
+      if (parentText && parentText.length > 0 && parentText.length < 100) {
+        path.unshift(parentText);
+      }
+      
+      const parentUl = currentLi.parentElement;
+      if (parentUl && parentUl.tagName === 'UL') {
+        currentLi = parentUl.closest('li');
+      } else {
+        currentLi = null;
+      }
+    }
+    
+    return path;
+  }
+  
   for (const selector of menuSelectors) {
     const menu = document.querySelector(selector);
     if (menu) {
@@ -344,12 +392,15 @@ function getMenuTree() {
                           item.getAttribute('aria-selected') === 'true';
         
         if (text && href) {
+          const path = extractParentPath(item);
+          
           items.push({
             index,
             text,
             href,
             isExpanded,
             isSelected,
+            path,
             element: item
           });
         }
