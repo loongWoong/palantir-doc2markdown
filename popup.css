@@ -89,6 +89,29 @@ h1 {
   cursor: not-allowed;
 }
 
+#autoCollectBtn {
+  width: 100%;
+  padding: 12px;
+  background: #34a853;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 10px;
+}
+
+#autoCollectBtn:hover {
+  background: #2d9144;
+}
+
+#autoCollectBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
 .status {
   margin-top: 15px;
   padding: 10px;

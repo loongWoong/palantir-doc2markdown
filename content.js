@@ -221,6 +221,10 @@ class HTMLToMarkdown {
       const img = document.querySelector(`img[src="${src}"]`);
       if (img) {
         if (img.complete && img.naturalWidth > 0) {
+          if (src.toLowerCase().endsWith('.gif')) {
+            const absoluteUrl = new URL(src, window.location.href).href;
+            return { url: absoluteUrl, isGif: true };
+          }
           const canvas = document.createElement('canvas');
           canvas.width = img.naturalWidth;
           canvas.height = img.naturalHeight;
@@ -314,6 +318,92 @@ function extractFirstH1Title(element) {
   return null;
 }
 
+function getMenuTree() {
+  const menuSelectors = [
+    'nav ul',
+    '.sidebar ul',
+    '.menu ul',
+    '[class*="sidebar"] ul',
+    '[class*="menu"] ul',
+    '[class*="navigation"] ul'
+  ];
+  
+  for (const selector of menuSelectors) {
+    const menu = document.querySelector(selector);
+    if (menu) {
+      const menuItems = menu.querySelectorAll('a, [role="menuitem"], [class*="menu-item"]');
+      const items = [];
+      
+      menuItems.forEach((item, index) => {
+        const text = item.textContent.trim();
+        const href = item.getAttribute('href');
+        const isExpanded = item.getAttribute('aria-expanded') === 'true';
+        const isSelected = item.classList.contains('active') || 
+                          item.classList.contains('selected') ||
+                          item.classList.contains('ptcom-design__isSelected__heuz3') ||
+                          item.getAttribute('aria-selected') === 'true';
+        
+        if (text && href) {
+          items.push({
+            index,
+            text,
+            href,
+            isExpanded,
+            isSelected,
+            element: item
+          });
+        }
+      });
+      
+      if (items.length > 0) {
+        return items;
+      }
+    }
+  }
+  
+  return null;
+}
+
+function getCurrentMenuItem() {
+  const menuItems = getMenuTree();
+  if (!menuItems) return null;
+  
+  return menuItems.find(item => item.isSelected) || menuItems[0];
+}
+
+function scrollToBottom() {
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: 'smooth'
+  });
+}
+
+function clickMenuItem(menuItem) {
+  if (menuItem && menuItem.element) {
+    menuItem.element.click();
+    return true;
+  }
+  return false;
+}
+
+function waitForPageLoad(timeout = 10000) {
+  return new Promise((resolve) => {
+    const startTime = Date.now();
+    
+    const checkLoad = () => {
+      if (document.readyState === 'complete') {
+        resolve(true);
+      } else if (Date.now() - startTime > timeout) {
+        resolve(false);
+      } else {
+        setTimeout(checkLoad, 100);
+      }
+    };
+    
+    checkLoad();
+  });
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'convertToMarkdown') {
     try {
@@ -351,6 +441,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     } catch (error) {
       sendResponse({ success: false, error: error.message });
+    }
+  }
+  
+  if (request.action === 'getMenuTree') {
+    const menuItems = getMenuTree();
+    sendResponse({ success: true, menuItems });
+  }
+  
+  if (request.action === 'getCurrentMenuItem') {
+    const currentItem = getCurrentMenuItem();
+    sendResponse({ success: true, currentItem });
+  }
+  
+  if (request.action === 'scrollToBottom') {
+    scrollToBottom();
+    sendResponse({ success: true });
+  }
+  
+  if (request.action === 'clickMenuItem') {
+    const { index } = request;
+    const menuItems = getMenuTree();
+    if (menuItems && menuItems[index]) {
+      const clicked = clickMenuItem(menuItems[index]);
+      sendResponse({ success: clicked });
+    } else {
+      sendResponse({ success: false, error: 'Menu item not found' });
     }
   }
   

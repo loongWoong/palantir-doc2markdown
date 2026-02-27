@@ -34,7 +34,13 @@
       <input type="text" id="imagePath" required placeholder="例如: /docs/resources/foundry/ontology/">
       <small>请输入图片存储路径</small>
     </div>
+    <div class="selector-section">
+      <label for="waitTime">自动采集等待时间(秒):</label>
+      <input type="number" id="waitTime" min="1" max="60" value="10">
+      <small>等待翻译插件加载的时间</small>
+    </div>
     <button id="convertBtn">转换为Markdown</button>
+    <button id="autoCollectBtn">自动采集</button>
     <div id="status" class="status"></div>
   </div>
   <script src="popup.js"></script>
