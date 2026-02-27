@@ -127,7 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalFilename = urlParts[urlParts.length - 1];
         
         if (originalFilename && originalFilename.includes('.')) {
-          filename = sanitizeFilename(originalFilename);
+          filename = originalFilename.split('?')[0];
+          filename = sanitizeFilename(filename);
           filename = filename.replace(/\.svg$/i, '.png');
         } else {
           const ext = image.alt ? 'png' : 'png';

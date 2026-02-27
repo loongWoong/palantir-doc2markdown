@@ -109,6 +109,7 @@ class HTMLToMarkdown {
         if (src) {
           const imageData = this.getImageData(src);
           let filename = src.split('/').pop();
+          filename = filename.split('?')[0];
           filename = filename.replace(/\.svg$/i, '.png');
           this.images.push({
             url: src,
