@@ -177,6 +177,13 @@ class HTMLToMarkdown {
     
     items.forEach((item, index) => {
       const content = Array.from(item.childNodes)
+        .filter(child => {
+          if (child.nodeType === Node.ELEMENT_NODE) {
+            const tagName = child.tagName.toLowerCase();
+            return tagName !== 'ul' && tagName !== 'ol';
+          }
+          return true;
+        })
         .map(child => this.processNode(child))
         .join('')
         .trim();
