@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .substring(0, 200);
   }
 
-  async function downloadMarkdown(markdown, title, savePath, pageUrl, menuPath) {
+  async function downloadMarkdown(markdown, title, savePath, pageUrl, menuPath, firstH1Title) {
     let filename;
     let subPath = '';
     
@@ -72,7 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
       subPath = menuPath.map(p => sanitizeFilename(p)).join('/') + '/';
     }
     
-    if (pageUrl) {
+    if (firstH1Title) {
+      filename = `${sanitizeFilename(firstH1Title)}.md`;
+    } else if (pageUrl) {
       try {
         const urlObj = new URL(pageUrl);
         const pathParts = urlObj.pathname.split('/').filter(part => part);
@@ -114,12 +116,16 @@ document.addEventListener('DOMContentLoaded', () => {
     URL.revokeObjectURL(url);
   }
 
-  async function downloadImages(images, firstH1Title, imagePath, pageUrl) {
+  async function downloadImages(images, firstH1Title, imagePath, pageUrl, menuPath) {
     if (!images || images.length === 0) {
       return;
     }
 
-    const basePath = imagePath ? imagePath.trim() : '';
+    let basePath = imagePath ? imagePath.trim() : '';
+    
+    if (menuPath && menuPath.length > 0) {
+      basePath += menuPath.map(p => sanitizeFilename(p)).join('/') + '/';
+    }
     
     for (let i = 0; i < images.length; i++) {
       const image = images[i];
@@ -203,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (response.success) {
         const menuPath = currentResponse.success && currentResponse.currentItem ? currentResponse.currentItem.path : [];
-        await downloadMarkdown(response.markdown, response.title, savePathInput.value, tab.url, menuPath);
+        await downloadMarkdown(response.markdown, response.title, savePathInput.value, tab.url, menuPath, response.firstH1Title);
         
         if (response.images && response.images.length > 0) {
           showStatus('正在下载图片...', 'loading');
@@ -309,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (convertResponse.success) {
           const currentTab = await chrome.tabs.get(tab.id);
           const menuPath = menuItem.path || [];
-          await downloadMarkdown(convertResponse.markdown, convertResponse.title, savePathInput.value, currentTab.url, menuPath);
+          await downloadMarkdown(convertResponse.markdown, convertResponse.title, savePathInput.value, currentTab.url, menuPath, convertResponse.firstH1Title);
           
           if (convertResponse.images && convertResponse.images.length > 0) {
             await downloadImages(convertResponse.images, convertResponse.firstH1Title, savePathInput.value, currentTab.url, menuPath);

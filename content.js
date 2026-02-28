@@ -302,18 +302,40 @@ function findMainContent() {
   return clone;
 }
 
+function extractTextWithTranslation(element) {
+  if (!element) return null;
+  
+  const clone = element.cloneNode(true);
+  
+  const translationWrappers = clone.querySelectorAll('.immersive-translate-target-wrapper');
+  translationWrappers.forEach(wrapper => {
+    const inner = wrapper.querySelector('.immersive-translate-target-inner');
+    if (inner) {
+      const translationText = inner.textContent.trim();
+      if (translationText) {
+        wrapper.textContent = ' ' + translationText;
+      } else {
+        wrapper.remove();
+      }
+    } else {
+      wrapper.remove();
+    }
+  });
+  
+  return clone.textContent.trim();
+}
+
 function extractFirstH1Title(element) {
   const h1 = element.querySelector('h1');
   if (h1) {
-    const text = h1.textContent.trim();
     const anchor = h1.querySelector('a');
     if (anchor) {
-      const anchorText = anchor.textContent.trim();
+      const anchorText = extractTextWithTranslation(anchor);
       if (anchorText) {
         return anchorText;
       }
     }
-    return text;
+    return extractTextWithTranslation(h1);
   }
   return null;
 }
@@ -337,31 +359,31 @@ function getMenuTree() {
       
       const panelTitle = currentLi.querySelector('[class*="panelTitle"]');
       if (panelTitle) {
-        parentText = panelTitle.textContent.trim();
+        parentText = extractTextWithTranslation(panelTitle);
       }
       
       if (!parentText) {
         const headerDiv = currentLi.querySelector('[class*="header"]');
         if (headerDiv) {
-          parentText = headerDiv.textContent.trim();
+          parentText = extractTextWithTranslation(headerDiv);
         }
       }
       
       if (!parentText) {
         const button = currentLi.querySelector('button, [role="button"]');
         if (button) {
-          parentText = button.textContent.trim();
+          parentText = extractTextWithTranslation(button);
         }
       }
       
       if (!parentText) {
         const link = currentLi.querySelector('a');
         if (link && link !== menuItem) {
-          parentText = link.textContent.trim();
+          parentText = extractTextWithTranslation(link);
         }
       }
       
-      if (parentText && parentText.length > 0 && parentText.length < 100) {
+      if (parentText && parentText.length > 0 && parentText.length < 200) {
         path.unshift(parentText);
       }
       
@@ -383,7 +405,7 @@ function getMenuTree() {
       const items = [];
       
       menuItems.forEach((item, index) => {
-        const text = item.textContent.trim();
+        const text = extractTextWithTranslation(item);
         const href = item.getAttribute('href');
         const isExpanded = item.getAttribute('aria-expanded') === 'true';
         const isSelected = item.classList.contains('active') || 
