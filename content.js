@@ -171,9 +171,10 @@ class HTMLToMarkdown {
     return clone.textContent.trim();
   }
 
-  processList(node, type) {
+  processList(node, type, level = 0) {
     const items = Array.from(node.querySelectorAll(':scope > li'));
     let result = '';
+    const indent = '  '.repeat(level);
     
     items.forEach((item, index) => {
       const content = Array.from(item.childNodes)
@@ -189,15 +190,15 @@ class HTMLToMarkdown {
         .trim();
       
       if (type === 'ul') {
-        result += `- ${content}\n`;
+        result += `${indent}- ${content}\n`;
       } else {
-        result += `${index + 1}. ${content}\n`;
+        result += `${indent}${index + 1}. ${content}\n`;
       }
       
       const nestedLists = item.querySelectorAll(':scope > ul, :scope > ol');
       nestedLists.forEach(nestedList => {
-        const nestedContent = this.processList(nestedList, nestedList.tagName.toLowerCase());
-        result += nestedContent.split('\n').map(line => '  ' + line).join('\n');
+        const nestedContent = this.processList(nestedList, nestedList.tagName.toLowerCase(), level + 1);
+        result += nestedContent;
       });
     });
     
