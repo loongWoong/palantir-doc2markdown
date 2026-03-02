@@ -1,0 +1,68 @@
+# Cursor Rules: HTML to Markdown Extension - 测试驱动开发规范
+
+## 项目概述
+这是一个 Chrome 扩展项目，用于将网页内容转换为 Markdown 格式并保存为文件。
+
+## 测试结构
+- 所有功能必须先写测试，再写实现
+- 测试文件放在 `tests/` 目录，与源码结构镜像
+- 测试命名：`[功能].test.js` 或 `[功能].spec.js`
+
+## 单元测试规范
+- 使用 Vitest + happy-dom（浏览器环境模拟）
+- 每个函数至少覆盖：正常路径、边界条件、错误处理
+- Mock 外部依赖：Chrome API、DOM 操作、定时器
+- 重点测试 HTMLToMarkdown 类的转换逻辑
+
+## 接口测试规范
+- 使用 Vitest 模拟 Chrome Extension API
+- 测试覆盖：消息传递、存储操作、下载功能
+- Mock chrome.tabs、chrome.storage、chrome.downloads 等 API
+
+## Chrome Extension 测试规范
+- 测试 content script 与 popup 之间的消息传递
+- 测试菜单树提取和导航功能
+- 测试文件下载和图片处理逻辑
+
+## 命令
+- `npm run test:unit` - 运行单元测试
+- `npm run test:unit:watch` - 监听模式运行单元测试
+- `npm run test:unit:coverage` - 运行单元测试并生成覆盖率报告
+- `npm run test:integration` - 运行接口测试
+- `npm run test:all` - 运行全部测试并生成报告
+- `npm run test:report` - 运行测试并打开报告
+- `npm run test:ci` - CI 环境运行测试
+
+## 报告查看
+- 覆盖率报告：`tests/reports/coverage/index.html`
+- JUnit 报告：`tests/reports/unit/junit.xml`
+- 合并报告：`tests/reports/final/index.html`
+
+## 关键测试场景
+### HTMLToMarkdown 类
+- HTML 标签转换（h1-h6, p, strong, em, code, pre）
+- 列表处理（ul, ol, 嵌套列表）
+- 表格转换
+- 链接处理（keepLinks 选项）
+- 图片处理（getImageData 方法）
+- 翻译元素处理（removeTranslations, includeTranslations 选项）
+
+### Content Script 功能
+- findMainContent 函数
+- extractFirstH1Title 函数
+- getMenuTree 函数
+- getCurrentMenuItem 函数
+- 消息监听器处理
+
+### Popup 功能
+- downloadMarkdown 函数
+- downloadImages 函数
+- convertToMarkdown 函数
+- autoCollect 函数
+- 文件名清理（sanitizeFilename）
+
+## 代码风格
+- 使用 ES6+ 语法
+- 类方法使用箭头函数或 bind 绑定 this
+- 错误处理使用 try-catch
+- 异步操作使用 async/await

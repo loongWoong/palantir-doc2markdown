@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="27" failures="0" errors="0" time="0.771">
+    <testsuite name="tests/unit/htmlToMarkdown.test.js" timestamp="2026-03-02T02:43:25.659Z" hostname="leon" tests="27" failures="0" errors="0" skipped="0" time="0.02">
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; constructor &gt; should initialize with default options" time="0.002">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; constructor &gt; should accept custom options" time="0.001">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should return empty string for null element" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should return empty string for undefined element" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert simple paragraph" time="0.002">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert heading tags" time="0.001">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert bold and italic text" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert inline code" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert code blocks" time="0.001">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert links when keepLinks is true" time="0.001">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should not convert links when keepLinks is false" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert unordered lists" time="0.001">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert ordered lists" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert nested lists" time="0.001">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert blockquotes" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert horizontal rules" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert images" time="0.002">
+            <system-err>
+Image element not found for src: image.png
+
+            </system-err>
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should convert tables" time="0.002">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; convert &gt; should remove translation elements when removeTranslations is true" time="0.001">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; removeTranslationElements &gt; should remove immersive-translate elements" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; isTranslationWrapper &gt; should identify translation wrapper elements" time="0.001">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; isTranslationWrapper &gt; should return false for non-wrapper elements" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; processTranslationNode &gt; should combine original and translation text" time="0.001">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; extractTranslationText &gt; should extract text from translation inner wrapper" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; extractTranslationText &gt; should return empty string when no inner wrapper found" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; extractOriginalText &gt; should extract original text without translation elements" time="0">
+        </testcase>
+        <testcase classname="tests/unit/htmlToMarkdown.test.js" name="HTMLToMarkdown &gt; a complex HTML document &gt; should convert a complete document structure" time="0.001">
+        </testcase>
+    </testsuite>
+</testsuites>

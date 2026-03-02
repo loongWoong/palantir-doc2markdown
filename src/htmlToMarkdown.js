@@ -2,6 +2,8 @@ class HTMLToMarkdown {
   constructor(options = {}) {
     this.removeTranslations = options.removeTranslations || false;
     this.keepLinks = options.keepLinks !== false;
+    this.includeTranslations = options.includeTranslations || false;
+    this.images = [];
   }
 
   convert(element) {
@@ -45,6 +47,11 @@ class HTMLToMarkdown {
     }
     
     const tagName = node.tagName.toLowerCase();
+    
+    if (this.includeTranslations && this.isTranslationWrapper(node)) {
+      return this.processTranslationNode(node);
+    }
+    
     const children = Array.from(node.childNodes)
       .map(child => this.processNode(child))
       .join('');
@@ -100,7 +107,16 @@ class HTMLToMarkdown {
         const alt = node.getAttribute('alt') || '';
         const src = node.getAttribute('src') || '';
         if (src) {
-          return `![${alt}](${src})\n\n`;
+          const imageData = this.getImageData(src);
+          let filename = src.split('/').pop();
+          filename = filename.split('?')[0];
+          filename = filename.replace(/\.svg$/i, '.png');
+          this.images.push({
+            url: src,
+            alt: alt,
+            data: imageData
+          });
+          return `![${alt}](${filename})\n\n`;
         }
         return '';
       case 'table':
@@ -122,8 +138,69 @@ class HTMLToMarkdown {
     }
   }
 
+  isTranslationWrapper(node) {
+    if (!node.classList) return false;
+    return node.classList.contains('immersive-translate-target-wrapper') ||
+           node.classList.contains('immersive-translate-target-translation-block-wrapper');
+  }
+
+  processTranslationNode(node) {
+    const translationText = this.extractTranslationText(node);
+    const originalText = this.extractOriginalText(node);
+    
+    if (translationText && originalText) {
+      return `${originalText.trim()} ${translationText.trim()}`;
+    } else if (translationText) {
+      return translationText.trim();
+    } else {
+      return originalText;
+    }
+  }
+
+  extractTranslationText(translationNode) {
+    const innerWrapper = translationNode.querySelector('.immersive-translate-target-inner');
+    if (innerWrapper) {
+      return innerWrapper.textContent.trim();
+    }
+    return '';
+  }
+
+  extractOriginalText(node) {
+    const clone = node.cloneNode(true);
+    const translationElements = clone.querySelectorAll('.immersive-translate-target-wrapper, .immersive-translate-target-inner');
+    translationElements.forEach(el => el.remove());
+    return clone.textContent.trim();
+  }
+
+  getImageData(src) {
+    try {
+      const img = document.querySelector(`img[src="${src}"]`);
+      if (img) {
+        if (img.complete && img.naturalWidth > 0) {
+          if (src.toLowerCase().endsWith('.gif')) {
+            const absoluteUrl = new URL(src, window.location.href).href;
+            return { url: absoluteUrl, isGif: true };
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          return canvas.toDataURL('image/png');
+        } else {
+          console.warn(`Image not fully loaded: ${src}`);
+        }
+      } else {
+        console.warn(`Image element not found for src: ${src}`);
+      }
+    } catch (error) {
+      console.warn('Failed to get image data:', error);
+    }
+    return null;
+  }
+
   processList(node, type) {
-    const items = Array.from(node.querySelectorAll(':scope > li'));
+    const items = Array.from(node.children).filter(child => child.tagName.toLowerCase() === 'li');
     let result = '';
     
     items.forEach((item, index) => {
@@ -138,7 +215,9 @@ class HTMLToMarkdown {
         result += `${index + 1}. ${content}\n`;
       }
       
-      const nestedLists = item.querySelectorAll(':scope > ul, :scope > ol');
+      const nestedLists = Array.from(item.children).filter(child => 
+        child.tagName.toLowerCase() === 'ul' || child.tagName.toLowerCase() === 'ol'
+      );
       nestedLists.forEach(nestedList => {
         const nestedContent = this.processList(nestedList, nestedList.tagName.toLowerCase());
         result += nestedContent.split('\n').map(line => '  ' + line).join('\n');
@@ -167,3 +246,5 @@ class HTMLToMarkdown {
     return markdown + '\n';
   }
 }
+
+export { HTMLToMarkdown }
